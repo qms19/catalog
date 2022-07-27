@@ -9,6 +9,8 @@ parameter: {
 	dbURL?: string
 	// +usage=Specify the domain, if set, ingress will be created if the gateway driver is nginx.
 	domain?: string
+	// +usage=Specify the name of the certificate cecret, if set, means enable the HTTPs.
+	secretName?: string
 	// +usage=Specify the gateway type.
 	gatewayDriver: *"nginx" | "traefik"
 	// +usage=Specify the serviceAccountName for apiserver
@@ -18,5 +20,5 @@ parameter: {
 	// +usage=Specify the names of imagePullSecret for private image registry, eg. "{a,b,c}"
 	imagePullSecrets?: [...string]
 	// +usage=Specify whether to enable the dex
-	dex: *"false" | "true"
+	dex: *false | bool
 }

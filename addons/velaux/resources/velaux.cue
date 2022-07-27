@@ -23,7 +23,7 @@ output: {
 		if parameter["serviceType"] != _|_ {
 			exposeType: parameter["serviceType"]
 		}
-		if parameter["dex"] == "true" {
+		if parameter["dex"] == true {
 			env: [
 				{
 					name:  "KUBEVELA_API_URL"
@@ -35,12 +35,12 @@ output: {
 				},
 			]
 		}
-		if parameter["dex"] == "false" {
+		if parameter["dex"] != true {
 			env: [
 				{
 					name:  "KUBEVELA_API_URL"
 					value: "apiserver.vela-system:8000"
-				},
+				}
 			]
 		}
 	}
@@ -59,6 +59,17 @@ output: {
 				},
 			]
 		}
+
+		httpsTrait: *[ if parameter["secretName"] != _|_ {
+			type: "https-route"
+			properties: {
+				domains: [ parameter["domain"]]
+				rules: [{port: 80}]
+				secrets: [{
+					name: parameter["secretName"]
+				}]
+			}}] | []
+
 		if parameter["gatewayDriver"] == "traefik" {
 			traits: [
 				{
@@ -68,7 +79,7 @@ output: {
 						rules: [{port: 80}]
 					}
 				},
-			]
+			] + httpsTrait
 		}
 	}
 	dependsOn: ["apiserver"]

@@ -33,14 +33,20 @@ import (
 )
 
 type Metadata struct {
-	Name          string   `json:"name" validate:"required"`
-	Version       string   `json:"version"`
-	Description   string   `json:"description"`
-	Icon          string   `json:"icon"`
-	URL           string   `json:"url,omitempty"`
-	Tags          []string `json:"tags,omitempty"`
-	NeedNamespace []string `json:"needNamespace,omitempty"`
-	Invisible     bool     `json:"invisible"`
+	Name          string              `json:"name" validate:"required"`
+	Version       string              `json:"version"`
+	Description   string              `json:"description"`
+	Icon          string              `json:"icon"`
+	URL           string              `json:"url,omitempty"`
+	Tags          []string            `json:"tags,omitempty"`
+	NeedNamespace []string            `json:"needNamespace,omitempty"`
+	Invisible     bool                `json:"invisible"`
+	System        *SystemRequirements `json:"system"`
+}
+
+type SystemRequirements struct {
+	Vela       string `json:"vela"`
+	Kubernetes string `json:"kubernetes"`
 }
 
 func main() {
@@ -103,12 +109,23 @@ func main() {
 				return
 			}
 			entry := repo.ChartVersions{}
-			entry = append(entry, &repo.ChartVersion{Metadata: &chart.Metadata{Name: info.Name(),
+			chartVersion := &repo.ChartVersion{Metadata: &chart.Metadata{Name: m.Name,
 				Version: m.Version, Icon: m.Icon, Keywords: m.Tags, Description: m.Description,
-				Home: m.URL}, Created: time.Now(), URLs: []string{repoURL + "/" + info.Name() + "-" + m.Version + ".tgz"}})
-			entries[info.Name()] = entry
+				Home: m.URL, Annotations: map[string]string{}}, Created: time.Now(), URLs: []string{repoURL + "/" + m.Name + "-" + m.Version + ".tgz"}}
 
-			err = helmSave(dir, info.Name(), info.Name(), m.Version)
+			if m.System != nil {
+				if len(m.System.Kubernetes) != 0 {
+					chartVersion.Metadata.Annotations["system.kubernetes"] = m.System.Kubernetes
+				}
+				if len(m.System.Vela) != 0 {
+					chartVersion.Metadata.Annotations["system.vela"] = m.System.Vela
+				}
+			}
+
+			entry = append(entry, chartVersion)
+			entries[m.Name] = entry
+
+			err = helmSave(dir, m.Name, info.Name(), m.Version)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -130,7 +147,7 @@ func main() {
 }
 
 func helmSave(dir, name, addonDir, version string) error {
-	filename := fmt.Sprintf("%s%s-%s.tgz", dir, name, version)
+	filename := fmt.Sprintf("%s-%s.tgz", name, version)
 	var outInfo bytes.Buffer
 	cmd := exec.Command("tar", "zcf", filename, dir+addonDir+"/")
 	cmd.Stdout = &outInfo
