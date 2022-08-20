@@ -17,7 +17,7 @@ parameter: {
 	// prometheus-server parameters
 
 	// +usage=Specify the image of prometheus-server
-	image: *"quay.io/prometheus/prometheus:v2.34.0" | string
+	image: *"bitnami/prometheus:2.37.0" | string
 	// +usage=Specify the imagePullPolicy of the image
 	imagePullPolicy: *"IfNotPresent" | "Never" | "Always"
 	// +usage=Specify the number of CPU units

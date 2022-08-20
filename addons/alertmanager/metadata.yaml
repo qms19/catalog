@@ -1,0 +1,8 @@
+description: An addon for KubeVela.
+icon: ""
+invisible: false
+name: alertmanager
+tags:
+- 0.24.0
+- alertmanager
+version: 1.0.0
