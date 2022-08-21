@@ -1,0 +1,10 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: demo
+  namespace: o11y-system
+spec:
+  replicas: 1
+  resources:
+    requests:
+      memory: 400Mi
